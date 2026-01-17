@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+.env
+
+# Flask
+instance/
+.flaskenv
+
+# Logs
+logs/
+*.log
+
+# Database
+*.sqlite3
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Node / frontend (if added later)
+node_modules/
+
+# Cache
+.cache/
+
+/notes.txt
