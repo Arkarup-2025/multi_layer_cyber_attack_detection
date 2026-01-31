@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from werkzeug.security import generate_password_hash
 from models.user import User
 from extensions import db
@@ -123,7 +123,10 @@ def login():
     db.session.add(event)
     db.session.commit()
 
-    return jsonify({
-        "message": "Login successful",
-        "user_id": user.id
-    }), 200
+    session["user_id"] = user.id
+    session["is_admin"] = user.is_admin
+
+    if user.is_admin:
+        return jsonify({"redirect": "/admin/dashboard"})
+    else:
+        return jsonify({"redirect": "/dashboard"})

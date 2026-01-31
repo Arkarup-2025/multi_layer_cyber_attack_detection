@@ -1,145 +1,115 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Admin Security Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        table {
-            border-collapse: collapse;
-            width: 100%;
-        }
-        th, td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: center;
-        }
-        th {
-            background-color: #f4f4f4;
-        }
-        .LOW {
-            color: green;
-        }
-        .MEDIUM {
-            color: orange;
-        }
-        .HIGH {
-            color: red;
-            font-weight: bold;
-        }
-        a {
-        text-decoration: none;
-        color: blue;
-        }
-    </style>
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
+<body class="bg-light">
 
-<h2>Security Alerts Dashboard</h2>
+{% include "navbar.html" %}
 
-<h3>Alert Severity Overview</h3>
-<canvas id="severityChart" width="400" height="150"></canvas>
+<div class="container mt-4">
 
-<h3>Users</h3>
-<table id="usersTable">
-    <thead>
-        <tr>
-            <th>User ID</th>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
+    <h2 class="text-center mb-4">Admin Security Dashboard</h2>
 
-<hr>
+    <!-- USERS -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-dark text-white">Users</div>
+        <div class="card-body">
+            <table class="table table-striped table-bordered" id="usersTable">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
 
+    <!-- ALERT CHART -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-warning">Alert Severity Overview</div>
+        <div class="card-body">
+            <canvas id="severityChart"></canvas>
+        </div>
+    </div>
 
-<table id="alertsTable">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>User ID</th>
-            <th>Current Risk Score</th>
-            <th>Severity</th>
-            <th>Message</th>
-            <th>Time</th>
-        </tr>
-    </thead>
-    <tbody>
-    </tbody>
-</table>
+    <!-- ALERTS -->
+    <div class="card shadow">
+        <div class="card-header bg-danger text-white">Security Alerts</div>
+        <div class="card-body">
+            <table class="table table-bordered table-striped" id="alertsTable">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>User</th>
+                        <th>Severity</th>
+                        <th>Message</th>
+                        <th>Risk</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
 
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 fetch("/api/admin/users")
-    .then(res => res.json())
-    .then(users => {
-        const tbody = document.querySelector("#usersTable tbody");
-
-        users.forEach(user => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${user.id}</td>
-                <td>${user.username}</td>
-                <td>${user.email}</td>
-                <td>
-                    <a href="/admin/user-profile/${user.id}">
-                        View Profile
-                    </a>
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
+.then(r=>r.json())
+.then(users=>{
+    const tbody=document.querySelector("#usersTable tbody");
+    users.forEach(u=>{
+        const row=document.createElement("tr");
+        row.innerHTML=`
+            <td>${u.id}</td>
+            <td>${u.username}</td>
+            <td>${u.email}</td>
+            <td><a href="/admin/user-profile/${u.id}" class="btn btn-sm btn-primary">View</a></td>
+        `;
+        tbody.appendChild(row);
     });
-
+});
 
 fetch("/api/admin/alerts")
-    .then(response => response.json())
-    .then(data => {
-        const tbody = document.querySelector("#alertsTable tbody");
+.then(r=>r.json())
+.then(data=>{
+    let low=0,medium=0,high=0;
+    const tbody=document.querySelector("#alertsTable tbody");
 
-        let low = 0, medium = 0, high = 0;
+    data.forEach(a=>{
+        if(a.severity==="LOW") low++;
+        else if(a.severity==="MEDIUM") medium++;
+        else high++;
 
-        data.forEach(alert => {
-            // Count severities
-            if (alert.severity === "LOW") low++;
-            else if (alert.severity === "MEDIUM") medium++;
-            else if (alert.severity === "HIGH") high++;
-
-            // Add table row
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${alert.id}</td>
-                <td>${alert.user_id}</td>
-                <td>${alert.risk_score}</td>
-                <td class="${alert.severity}">${alert.severity}</td>
-                <td>${alert.message}</td>
-                <td>${new Date(alert.created_at + "Z").toLocaleString("en-IN", {
-                    timeZone: "Asia/Kolkata"
-                })}</td>
-            `;
-            tbody.appendChild(row);
-        });
-
-        // Create chart
-        const ctx = document.getElementById("severityChart").getContext("2d");
-        new Chart(ctx, {
-            type: "bar",
-            data: {
-                labels: ["LOW", "MEDIUM", "HIGH"],
-                datasets: [{
-                    label: "Number of Alerts",
-                    data: [low, medium, high]
-                }]
-            }
-        });
+        const row=document.createElement("tr");
+        row.innerHTML=`
+            <td>${a.id}</td>
+            <td>${a.user_id}</td>
+            <td class="${a.severity}">${a.severity}</td>
+            <td>${a.message}</td>
+            <td>${a.risk_score}</td>
+            <td>${new Date(a.created_at + "Z").toLocaleString("en-IN",{timeZone:"Asia/Kolkata"})}</td>
+        `;
+        tbody.appendChild(row);
     });
-</script>
 
+    new Chart(document.getElementById("severityChart"),{
+        type:"bar",
+        data:{
+            labels:["LOW","MEDIUM","HIGH"],
+            datasets:[{label:"Alerts",data:[low,medium,high]}]
+        }
+    });
+});
+</script>
 
 </body>
 </html>

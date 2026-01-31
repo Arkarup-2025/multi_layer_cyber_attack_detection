@@ -1,4 +1,4 @@
-from datetime import datetime,timezone
+from datetime import datetime, timezone
 from extensions import db
 
 class User(db.Model):
@@ -8,7 +8,5 @@ class User(db.Model):
     username = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
-    created_at = db.Column(
-        db.DateTime,
-        default=lambda: datetime.now(timezone.utc)
-    )
+    is_admin = db.Column(db.Boolean, default=False)   #NEW
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))

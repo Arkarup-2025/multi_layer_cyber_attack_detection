@@ -6,10 +6,17 @@ from models.user import User
 
 import json
 
+from services.auth_guard import admin_required
+from flask import abort
+
+
 admin_bp = Blueprint("admin_bp", __name__)
 
 @admin_bp.route("/alerts", methods=["GET"])
 def get_alerts():
+    if not admin_required():
+        return jsonify({"error": "Unauthorized"}), 403
+
     alerts = Alert.query.order_by(Alert.created_at.desc()).all()
     result = []
 
@@ -31,6 +38,8 @@ def get_alerts():
 
 @admin_bp.route("/users", methods=["GET"])
 def get_users():
+    if not admin_required():
+        return jsonify({"error": "Unauthorized"}), 403
     users = User.query.all()
 
     return jsonify([
@@ -44,6 +53,8 @@ def get_users():
 
 @admin_bp.route("/user/<int:user_id>", methods=["GET"])
 def get_user_profile(user_id):
+    if not admin_required():
+        return jsonify({"error": "Unauthorized"}), 403
     user = User.query.get(user_id)
     if not user:
         return jsonify({"error": "User not found"}), 404
@@ -85,6 +96,8 @@ def get_user_profile(user_id):
 
 @admin_bp.route("/user/<int:user_id>/timeline", methods=["GET"])
 def user_timeline(user_id):
+    if not admin_required():
+        return jsonify({"error": "Unauthorized"}), 403
     events = EventLog.query.filter_by(user_id=user_id)\
         .order_by(EventLog.created_at.asc()).all()
 

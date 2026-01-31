@@ -7,9 +7,14 @@ from routes.auth_routes import auth_bp
 from routes.admin_routes import admin_bp
 
 from flask import render_template
+from flask import session
+
+from flask import redirect, url_for, session
+
 
 app = Flask(__name__)
 app.config.from_object(Config)
+app.secret_key = "supersecretkey"  #demo
 
 db.init_app(app)
 
@@ -21,11 +26,25 @@ app.register_blueprint(admin_bp, url_prefix="/api/admin")
 
 @app.route("/")
 def home():
-    return jsonify({"message": "Cyber Security API running"})
+    return render_template("home.html")
+
+@app.route("/register")
+def register_page():
+    return render_template("register.html")
 
 @app.route("/admin/dashboard")
 def admin_dashboard():
+    if "user_id" not in session or not session.get("is_admin"):
+        return redirect("/login")
     return render_template("admin_dashboard.html")
+
+
+@app.route("/dashboard")
+def user_dashboard():
+    if "user_id" not in session:
+        return redirect("/login")
+    return render_template("user_dashboard.html")
+
 
 @app.route("/login")
 def login_page():
@@ -33,11 +52,21 @@ def login_page():
 
 @app.route("/activity")
 def activity_page():
-    return render_template("activity.html")
+    if "user_id" not in session:
+        return redirect("/login")
+    return render_template("activity.html", user_id=session["user_id"])
+
 
 @app.route("/admin/user-profile/<int:user_id>")
 def user_profile(user_id):
+    if "user_id" not in session or not session.get("is_admin"):
+        return redirect("/login")
     return render_template("user_profile.html", user_id=user_id)
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/login")
 
 
 if __name__ == "__main__":
