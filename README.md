@@ -2,6 +2,10 @@
 
 SentinelX is a Flask-based cybersecurity monitoring application that combines authentication monitoring, behavior anomaly detection, risk scoring, alerting, and machine-learning URL phishing detection in one platform.
 
+## Screenshot
+<img width="1919" height="858" alt="Screenshot 2026-02-27 201215" src="https://github.com/user-attachments/assets/cfd3d684-c272-4389-8052-839341d0861c" />
+
+
 ## Features
 - Session-based user authentication with `is_admin` role support
 - Event logging pipeline for security and activity events
