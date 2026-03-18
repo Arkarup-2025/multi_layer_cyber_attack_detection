@@ -3,6 +3,8 @@ from __future__ import annotations
 import os
 
 from dotenv import load_dotenv
+load_dotenv()
+
 from flask import Flask, redirect, render_template, session
 
 from config import Config
@@ -12,7 +14,7 @@ from routes.auth_routes import auth_bp
 from routes.event_routes import event_bp
 from routes.phishing_routes import phishing_bp
 
-load_dotenv()
+
 
 app = Flask(__name__)
 app.config.from_object(Config)
